@@ -1,0 +1,106 @@
+﻿@model TechMoveGLMS.Models.ServiceRequest
+
+@{
+    ViewData["Title"] = "Create Service Request";
+    var contract = ViewBag.Contract as TechMoveGLMS.Models.Contract;
+    var currentRate = ViewBag.CurrentRate;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center mb-4">
+            <i class="fas fa-truck fa-3x text-primary"></i>
+            <h2 class="mt-2">Create Service Request</h2>
+            <p class="text-muted">
+                Contract: <strong>@contract?.Client?.Name</strong> |
+                Service Level: <strong>@contract?.ServiceLevel</strong>
+            </p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+            </div>
+        }
+
+        <div class="stat-card">
+            <form asp-action="Create" method="post">
+                <input type="hidden" name="contractId" value="@ViewBag.ContractId" />
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-bold">
+                        <i class="fas fa-file-alt me-1"></i>Service Description
+                    </label>
+                    <textarea asp-for="Description" class="form-control form-control-modern" rows="4" placeholder="Describe the service required..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AmountUSD" class="form-label fw-bold">
+                        <i class="fas fa-dollar-sign me-1"></i>Amount (USD)
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="AmountUSD" id="usdAmount" class="form-control form-control-modern" type="number" step="0.01" oninput="calculateZar()" placeholder="Enter amount in USD" />
+                    </div>
+                    <span asp-validation-for="AmountUSD" class="text-danger"></span>
+                    <small class="text-muted">
+                        <i class="fas fa-exchange-alt me-1"></i>Live exchange rate: 1 USD = <span id="rateDisplay">@currentRate</span> ZAR
+                    </small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-rand me-1"></i>Amount (ZAR)
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">R</span>
+                        <input id="zarAmount" class="form-control form-control-modern" readonly disabled placeholder="Auto-calculated" />
+                    </div>
+                    <small class="text-success">
+                        <i class="fas fa-magic me-1"></i>Auto-calculated using live exchange rate
+                    </small>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="Details" asp-controller="Contracts" asp-route-id="@ViewBag.ContractId" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn-gradient">
+                        <i class="fas fa-check-circle me-1"></i>Create Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const exchangeRate = @currentRate;
+    document.getElementById('rateDisplay').innerText = exchangeRate.toFixed(4);
+
+    function calculateZar() {
+        const usdInput = document.getElementById('usdAmount');
+        const zarInput = document.getElementById('zarAmount');
+
+        let usdValue = parseFloat(usdInput.value);
+
+        if (isNaN(usdValue) || usdValue <= 0) {
+            zarInput.value = '';
+            zarInput.placeholder = 'Auto-calculated amount';
+            return;
+        }
+
+        const zarValue = usdValue * exchangeRate;
+        zarInput.value = 'R ' + zarValue.toFixed(2);
+        zarInput.style.fontWeight = 'bold';
+        zarInput.style.color = '#28a745';
+    }
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

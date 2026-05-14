@@ -1,0 +1,77 @@
+﻿@model TechMoveGLMS.Models.Client
+
+@{
+    ViewData["Title"] = "Create Client";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center mb-4">
+            <i class="fas fa-user-plus fa-3x text-primary"></i>
+            <h2 class="mt-2">Create New Client</h2>
+            <p class="text-muted">Enter the client's information below</p>
+        </div>
+
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-bold">
+                    <i class="fas fa-building me-1"></i>Company Name
+                </label>
+                <input asp-for="Name" class="form-control form-control-modern" placeholder="Enter company name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-bold">
+                    <i class="fas fa-envelope me-1"></i>Email Address
+                </label>
+                <input asp-for="Email" class="form-control form-control-modern" placeholder="Enter email address" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Phone" class="form-label fw-bold">
+                    <i class="fas fa-phone me-1"></i>Phone Number
+                </label>
+                <input asp-for="Phone" class="form-control form-control-modern" placeholder="Enter phone number" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Region" class="form-label fw-bold">
+                    <i class="fas fa-map-marker-alt me-1"></i>Region
+                </label>
+                <select asp-for="Region" class="form-control form-control-modern">
+                    <option value="">Select Region</option>
+                    <option value="Gauteng">Gauteng</option>
+                    <option value="Western Cape">Western Cape</option>
+                    <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                    <option value="Eastern Cape">Eastern Cape</option>
+                    <option value="Free State">Free State</option>
+                    <option value="Limpopo">Limpopo</option>
+                    <option value="Mpumalanga">Mpumalanga</option>
+                    <option value="North West">North West</option>
+                    <option value="Northern Cape">Northern Cape</option>
+                </select>
+                <span asp-validation-for="Region" class="text-danger"></span>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a asp-action="Index" class="btn btn-secondary me-md-2">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </a>
+                <button type="submit" class="btn-gradient">
+                    <i class="fas fa-save me-1"></i>Create Client
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

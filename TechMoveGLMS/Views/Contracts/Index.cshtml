@@ -1,0 +1,93 @@
+﻿@model IEnumerable<TechMoveGLMS.Models.Contract>
+
+@{
+    ViewData["Title"] = "Contracts";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-file-contract me-2" style="color: #FF6B8A;"></i>Contract Management</h2>
+    <div>
+        <a asp-action="Search" class="btn-outline-gradient me-2">
+            <i class="fas fa-search me-2"></i>Search
+        </a>
+        <a asp-action="Create" class="btn-gradient">
+            <i class="fas fa-plus-circle me-2"></i>New Contract
+        </a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+        <h4>No contracts yet</h4>
+        <p>Click the button above to create your first contract</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-modern">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Service Level</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var contract in Model)
+                {
+                    <tr>
+                        <td><strong>@contract.Client?.Name</strong></td>
+                        <td>@contract.StartDate.ToString("dd MMM yyyy")</td>
+                        <td>@contract.EndDate.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (contract.ServiceLevel == "Premium")
+                            {
+                                <span class="badge-active">Premium</span>
+                            }
+                            else if (contract.ServiceLevel == "Standard")
+                            {
+                                <span class="badge" style="background: #9B59B6;">Standard</span>
+                            }
+                            else
+                            {
+                                <span>@contract.ServiceLevel</span>
+                            }
+                        </td>
+                        <td>
+                            @if (contract.Status == "Active")
+                            {
+                                <span class="badge-active">Active</span>
+                            }
+                            else if (contract.Status == "Draft")
+                            {
+                                <span class="badge-draft">Draft</span>
+                            }
+                            else if (contract.Status == "Expired")
+                            {
+                                <span class="badge-expired">Expired</span>
+                            }
+                            else
+                            {
+                                <span class="badge-hold">On Hold</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@contract.ContractId" class="btn btn-sm me-1" style="background: #FF6B8A; color: white;">
+                                <i class="fas fa-eye"></i> Details
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@contract.ContractId" class="btn btn-sm me-1" style="background: #FF9F43; color: white;">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

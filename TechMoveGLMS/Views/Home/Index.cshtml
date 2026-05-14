@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+        border-radius: 20px;
+        padding: 50px;
+        color: white;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: rgba(181, 131, 141, 0.1);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .feature-icon i {
+            font-size: 40px;
+            color: #B5838D;
+        }
+</style>
+
+<div class="hero-section">
+    <div class="hero-title">
+        <i class="fas fa-truck-fast me-3"></i>TechMove GLMS
+    </div>
+    <p class="lead">Enterprise Global Logistics Management System</p>
+    <p>Streamline your operations with automated contract management, real-time currency conversion, and intelligent reporting</p>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-4">
+        <div class="stat-card text-center">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h4>Client Management</h4>
+            <p class="text-muted">Manage all your clients in one place with detailed profiles and contact information</p>
+            <a asp-controller="Clients" asp-action="Index" class="btn-outline-gradient">Manage Clients →</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card text-center">
+            <div class="feature-icon">
+                <i class="fas fa-file-contract"></i>
+            </div>
+            <h4>Contract Tracking</h4>
+            <p class="text-muted">Upload signed agreements, track statuses, and manage service levels efficiently</p>
+            <a asp-controller="Contracts" asp-action="Index" class="btn-outline-gradient">View Contracts →</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card text-center">
+            <div class="feature-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <h4>Live Currency</h4>
+            <p class="text-muted">Real-time USD to ZAR conversion with automatic calculation</p>
+            <a asp-controller="Contracts" asp-action="Create" class="btn-outline-gradient">New Contract →</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="stat-card">
+            <h5><i class="fas fa-exchange-alt me-2" style="color: #B5838D;"></i>Quick Actions</h5>
+            <hr>
+            <div class="d-grid gap-2">
+                <a asp-controller="Clients" asp-action="Create" class="btn-gradient">
+                    <i class="fas fa-user-plus me-2"></i>Add New Client
+                </a>
+                <a asp-controller="Contracts" asp-action="Create" class="btn-outline-gradient">
+                    <i class="fas fa-file-signature me-2"></i>Create Contract
+                </a>
+                <a asp-controller="Contracts" asp-action="Search" class="btn-outline-gradient">
+                    <i class="fas fa-search me-2"></i>Search & Reports
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="stat-card">
+            <h5><i class="fas fa-info-circle me-2" style="color: #B5838D;"></i>System Features</h5>
+            <hr>
+            <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #95A78D;"></i> Automated currency conversion via live API</li>
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #95A78D;"></i> Secure PDF upload and management</li>
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #95A78D;"></i> Intelligent contract status workflow</li>
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #95A78D;"></i> Advanced search and filtering</li>
+                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #95A78D;"></i> Comprehensive unit testing (16/16 passing)</li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,123 @@
+﻿@model IEnumerable<TechMoveGLMS.Models.Contract>
+
+@{
+    ViewData["Title"] = "Search Contracts";
+}
+
+<div class="text-center mb-4">
+    <i class="fas fa-search fa-3x text-primary"></i>
+    <h2 class="mt-2">Contract Search & Reports</h2>
+    <p class="text-muted">Filter contracts by date range and status</p>
+</div>
+
+<div class="stat-card mb-4">
+    <form method="get" asp-action="Search">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">
+                    <i class="fas fa-calendar-alt me-1"></i>From Date
+                </label>
+                <input type="date" name="startDate" class="form-control form-control-modern" value="@ViewBag.CurrentStartDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">
+                    <i class="fas fa-calendar-check me-1"></i>To Date
+                </label>
+                <input type="date" name="endDate" class="form-control form-control-modern" value="@ViewBag.CurrentEndDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">
+                    <i class="fas fa-tag me-1"></i>Status
+                </label>
+                <select name="status" class="form-control form-control-modern">
+                    <option value="">-- All Statuses --</option>
+                    <option value="Active" selected="@(ViewBag.CurrentStatus == "Active")">Active</option>
+                    <option value="Draft" selected="@(ViewBag.CurrentStatus == "Draft")">Draft</option>
+                    <option value="Expired" selected="@(ViewBag.CurrentStatus == "Expired")">Expired</option>
+                    <option value="OnHold" selected="@(ViewBag.CurrentStatus == "OnHold")">On Hold</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn-gradient w-100">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@if (Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-chart-bar me-2"></i>Found <strong>@Model.Count()</strong> contract(s) matching your criteria
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-modern">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Service Level</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var contract in Model)
+                {
+                    <tr>
+                        <td><strong>@contract.Client?.Name</strong></td>
+                        <td>@contract.StartDate.ToString("dd MMM yyyy")</td>
+                        <td>@contract.EndDate.ToString("dd MMM yyyy")</td>
+                        <td>@contract.ServiceLevel</td>
+                        <td>
+                            @if (contract.Status == "Active")
+                            {
+                                <span class="badge-active">Active</span>
+                            }
+                            else if (contract.Status == "Draft")
+                            {
+                                <span class="badge-draft">Draft</span>
+                            }
+                            else if (contract.Status == "Expired")
+                            {
+                                <span class="badge-expired">Expired</span>
+                            }
+                            else
+                            {
+                                <span class="badge-hold">On Hold</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@contract.ContractId" class="btn btn-sm btn-info text-white">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (ViewBag.CurrentStartDate != null || ViewBag.CurrentEndDate != null || !string.IsNullOrEmpty(ViewBag.CurrentStatus))
+{
+    <div class="text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h4>No contracts found</h4>
+        <p class="text-muted">Try adjusting your search criteria</p>
+        <a asp-action="Search" class="btn-outline-gradient">
+            <i class="fas fa-redo me-2"></i>Clear Filters
+        </a>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="fas fa-filter fa-3x text-muted mb-3"></i>
+        <h4>Ready to search</h4>
+        <p class="text-muted">Use the filters above to find contracts</p>
+    </div>
+}

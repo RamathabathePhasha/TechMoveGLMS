@@ -1,0 +1,362 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TechMove GLMS Pro</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #F9F5F7 0%, #F0EDF2 100%);
+            min-height: 100vh;
+        }
+
+        /* Modern Navbar - Plum */
+        .navbar-modern {
+            background: rgba(90, 74, 110, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(90, 74, 110, 0.2);
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #F0EDF2 !important;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+            border-radius: 10px;
+            padding: 8px 16px !important;
+        }
+
+            .nav-link:hover {
+                background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+                color: white !important;
+                transform: translateY(-2px);
+            }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 40px rgba(90, 74, 110, 0.15);
+            border-radius: 15px;
+            padding: 10px;
+            margin-top: 10px;
+            background: #FFFFFF;
+        }
+
+        .dropdown-item {
+            border-radius: 10px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #6D6875;
+        }
+
+            .dropdown-item:hover {
+                background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+                color: white;
+                transform: translateX(5px);
+            }
+
+        /* Main Content Card */
+        .main-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(90, 74, 110, 0.08);
+            padding: 30px;
+            margin: 20px auto;
+        }
+
+        /* Buttons */
+        .btn-gradient {
+            background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+            .btn-gradient:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(181, 131, 141, 0.3);
+                color: white;
+                text-decoration: none;
+            }
+
+        .btn-outline-gradient {
+            background: transparent;
+            border: 2px solid #B5838D;
+            color: #B5838D;
+            padding: 10px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+            .btn-outline-gradient:hover {
+                background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+                color: white;
+                border-color: transparent;
+                transform: translateY(-2px);
+                text-decoration: none;
+            }
+
+        /* Tables */
+        .table-modern {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            width: 100%;
+        }
+
+            .table-modern thead {
+                background: linear-gradient(135deg, #9B6B9E 0%, #6D6875 100%);
+                color: white;
+            }
+
+                .table-modern thead th {
+                    padding: 15px;
+                    font-weight: 600;
+                    border: none;
+                }
+
+            .table-modern tbody tr {
+                transition: all 0.3s ease;
+            }
+
+                .table-modern tbody tr:hover {
+                    background: #F9F5F7;
+                }
+
+            .table-modern tbody td {
+                padding: 12px 15px;
+                vertical-align: middle;
+            }
+
+        /* Badges */
+        .badge-active {
+            background: linear-gradient(135deg, #95A78D 0%, #7D8A6E 100%);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            display: inline-block;
+        }
+
+        .badge-draft {
+            background: linear-gradient(135deg, #E6A68E 0%, #D48C73 100%);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            display: inline-block;
+        }
+
+        .badge-expired {
+            background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            display: inline-block;
+        }
+
+        .badge-hold {
+            background: linear-gradient(135deg, #6D6875 0%, #5A4A6E 100%);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            display: inline-block;
+        }
+
+        .badge-info {
+            background: #9B6B9E;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            display: inline-block;
+        }
+
+        /* Cards */
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 5px 15px rgba(90, 74, 110, 0.05);
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(181, 131, 141, 0.1);
+            }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #B5838D 0%, #9B6B9E 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+            .stat-icon i {
+                font-size: 30px;
+                color: white;
+            }
+
+        /* Forms */
+        .form-control-modern {
+            border-radius: 12px;
+            border: 2px solid #E8E2E6;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+            .form-control-modern:focus {
+                border-color: #B5838D;
+                box-shadow: 0 0 0 3px rgba(181, 131, 141, 0.1);
+                outline: none;
+            }
+
+        /* Footer */
+        .footer-modern {
+            background: rgba(90, 74, 110, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            margin-top: 50px;
+            text-align: center;
+            color: #F0EDF2;
+        }
+
+        /* Alerts */
+        .alert-modern {
+            border-radius: 15px;
+            border: none;
+            padding: 15px 20px;
+        }
+
+        h1, h2, h3, h4, h5 {
+            color: #5A4A6E;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-modern sticky-top">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-truck-fast me-2"></i>TechMove GLMS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="clientsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users me-1"></i>Clients
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Clients" asp-action="Index"><i class="fas fa-eye me-2"></i>View All Clients</a></li>
+                            <li><a class="dropdown-item" asp-controller="Clients" asp-action="Create"><i class="fas fa-plus-circle me-2"></i>Add New Client</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="contractsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-contract me-1"></i>Contracts
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Contracts" asp-action="Index"><i class="fas fa-list me-2"></i>All Contracts</a></li>
+                            <li><a class="dropdown-item" asp-controller="Contracts" asp-action="Create"><i class="fas fa-plus-circle me-2"></i>New Contract</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" asp-controller="Contracts" asp-action="Search"><i class="fas fa-search me-2"></i>Search Contracts</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Contracts" asp-action="Search">
+                            <i class="fas fa-chart-line me-1"></i>Reports
+                        </a>
+                    </li>
+                </ul>
+                <span class="ms-3" style="color: #FFD6E0;">
+                    <i class="fas fa-calendar-alt me-1"></i>@DateTime.Now.ToString("dd MMM yyyy")
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-modern mt-3" style="background: #E8F0E5; color: #7D8A6E;">
+                <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close float-end" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-modern mt-3" style="background: #F0E5E8; color: #B5838D;">
+                <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close float-end" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="main-card">
+            @RenderBody()
+        </div>
+    </div>
+
+    <footer class="footer-modern">
+        <div class="container">
+            <p class="mb-0">&copy; @DateTime.Now.Year TechMove Global Logistics Management System | Professional Edition</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

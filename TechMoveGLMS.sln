@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37203.1 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechMoveGLMS", "TechMoveGLMS\TechMoveGLMS.csproj", "{764EA90E-8E49-4456-9B80-71087313AE5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechMoveGLMS.xUnitTests", "TechMoveGLMS.xUnitTests\TechMoveGLMS.xUnitTests.csproj", "{41FDD43B-D5C3-4ABA-B207-C5482EFB1FB0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{764EA90E-8E49-4456-9B80-71087313AE5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{764EA90E-8E49-4456-9B80-71087313AE5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{764EA90E-8E49-4456-9B80-71087313AE5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{764EA90E-8E49-4456-9B80-71087313AE5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41FDD43B-D5C3-4ABA-B207-C5482EFB1FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41FDD43B-D5C3-4ABA-B207-C5482EFB1FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41FDD43B-D5C3-4ABA-B207-C5482EFB1FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41FDD43B-D5C3-4ABA-B207-C5482EFB1FB0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FE17254D-7F46-4AB3-B8D2-A0EE0A3C32F4}
+	EndGlobalSection
+EndGlobal
