@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TechMoveGLMS.Data;
+using TechMoveGLMS.Repositories;   // ADD THIS - brings in repository interfaces
 using TechMoveGLMS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,10 @@ builder.Services.AddHttpClient<ICurrencyService, CurrencyService>();
 // Add session support (helps with TempData)
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+
+// Add repository and service dependencies
+builder.Services.AddScoped<IContractRepository, ContractRepository>();
+builder.Services.AddScoped<IContractService, ContractService>();
 
 var app = builder.Build();
 

@@ -1,34 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TechMoveGLMS.Data;
 using TechMoveGLMS.Models;
+using TechMoveGLMS.Services;  // We need this to use IContractService
 
 namespace TechMoveGLMS.Controllers
 {
-    // This controller handles everything related to Contracts
+    // STUDENT NOTE: This controller is now THIN - it does very little work
+    // All the real work is delegated to the Service layer
     public class ContractsController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment; // For file handling
+        // The controller ONLY knows about the Service (not the database!)
+        private readonly IContractService _contractService;
+        private readonly IWebHostEnvironment _webHostEnvironment;  // Still needed for file paths
 
-        public ContractsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        // Constructor receives the service via Dependency Injection
+        public ContractsController(IContractService contractService, IWebHostEnvironment webHostEnvironment)
         {
-            _context = context;
+            _contractService = contractService;
             _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Contracts - Show all contracts
+        // STUDENT NOTE: Controller just asks service for data, then shows view
         public async Task<IActionResult> Index()
         {
-            var contracts = await _context.Contracts
-                .Include(c => c.Client)  // Include the client info
-                .ToListAsync();
+            var contracts = await _contractService.GetAllContractsAsync();
             return View(contracts);
         }
 
-        // GET: Contracts/Details/5 - Show one contract details
-        // GET: Contracts/Details/5
-        // GET: Contracts/Details/5
+        // GET: Contracts/Details/5 - Show one contract with details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,11 +35,7 @@ namespace TechMoveGLMS.Controllers
                 return NotFound();
             }
 
-            var contract = await _context.Contracts
-                .Include(c => c.Client)
-                .Include(c => c.ServiceRequests)
-                .FirstOrDefaultAsync(m => m.ContractId == id);
-
+            var contract = await _contractService.GetContractDetailsAsync(id.Value);
             if (contract == null)
             {
                 return NotFound();
@@ -49,65 +44,68 @@ namespace TechMoveGLMS.Controllers
             return View(contract);
         }
 
-        // GET: Contracts/Create - Show form to create contract
+        // GET: Contracts/Create - Show the form
         public IActionResult Create()
         {
-            ViewBag.Clients = _context.Clients.ToList();
             return View();
         }
 
-        // POST: Contracts/Create - Save new contract with PDF upload
+        // POST: Contracts/Create - Save new contract
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ClientId,StartDate,EndDate,Status,ServiceLevel")] Contract contract, IFormFile? signedAgreement)
         {
             if (ModelState.IsValid)
             {
-                // Handle file upload if user selected a file
+                string? filePath = null;
+                string? fileName = null;
+
+                // Handle file upload (this is still in controller because it's HTTP/web concern)
                 if (signedAgreement != null && signedAgreement.Length > 0)
                 {
-                    // VALIDATION: Only PDF files allowed!
+                    // BUSINESS RULE: Only PDF files allowed
                     var fileExtension = Path.GetExtension(signedAgreement.FileName).ToLower();
                     if (fileExtension != ".pdf")
                     {
                         ModelState.AddModelError("signedAgreement", "ONLY PDF files are allowed!");
-                        ViewBag.Clients = _context.Clients.ToList();
                         return View(contract);
                     }
 
-                    // Create uploads folder if it doesn't exist
+                    // Save the file to disk (web concern)
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
                     if (!Directory.Exists(uploadsFolder))
                     {
                         Directory.CreateDirectory(uploadsFolder);
                     }
 
-                    // Create a unique filename (to avoid overwriting)
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + signedAgreement.FileName;
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    string fullFilePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                    // Save the file to disk
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    using (var fileStream = new FileStream(fullFilePath, FileMode.Create))
                     {
                         await signedAgreement.CopyToAsync(fileStream);
                     }
 
-                    // Save the file path in the database
-                    contract.SignedAgreementPath = "/uploads/" + uniqueFileName;
-                    contract.SignedAgreementFileName = signedAgreement.FileName;
+                    filePath = "/uploads/" + uniqueFileName;
+                    fileName = signedAgreement.FileName;
                 }
 
-                _context.Add(contract);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Contract created successfully!";
-                return RedirectToAction(nameof(Index));
+                // STUDENT NOTE: Now ask the SERVICE to create the contract
+                var result = await _contractService.CreateContractAsync(contract, filePath, fileName);
+
+                if (result.Success)
+                {
+                    TempData["Success"] = "Contract created successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ModelState.AddModelError("", result.Error ?? "Error creating contract");
             }
 
-            ViewBag.Clients = _context.Clients.ToList();
             return View(contract);
         }
 
-        // GET: Contracts/Edit/5 - Edit contract
+        // GET: Contracts/Edit/5 - Show edit form
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -115,13 +113,12 @@ namespace TechMoveGLMS.Controllers
                 return NotFound();
             }
 
-            var contract = await _context.Contracts.FindAsync(id);
+            var contract = await _contractService.GetContractForEditAsync(id.Value);
             if (contract == null)
             {
                 return NotFound();
             }
 
-            ViewBag.Clients = _context.Clients.ToList();
             return View(contract);
         }
 
@@ -137,99 +134,71 @@ namespace TechMoveGLMS.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                string? oldFilePath = contract.SignedAgreementPath;
+                string? oldFileName = contract.SignedAgreementFileName;
+
+                // Handle new file upload if provided
+                if (signedAgreement != null && signedAgreement.Length > 0)
                 {
-                    // Handle new file upload if provided
-                    if (signedAgreement != null && signedAgreement.Length > 0)
+                    // BUSINESS RULE: Validate PDF
+                    var fileExtension = Path.GetExtension(signedAgreement.FileName).ToLower();
+                    if (fileExtension != ".pdf")
                     {
-                        // Validate it's a PDF
-                        var fileExtension = Path.GetExtension(signedAgreement.FileName).ToLower();
-                        if (fileExtension != ".pdf")
-                        {
-                            ModelState.AddModelError("signedAgreement", "ONLY PDF files are allowed!");
-                            ViewBag.Clients = _context.Clients.ToList();
-                            return View(contract);
-                        }
-
-                        // Delete old file if it exists
-                        if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
-                        {
-                            string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath,
-                                contract.SignedAgreementPath.TrimStart('/'));
-                            if (System.IO.File.Exists(oldFilePath))
-                            {
-                                System.IO.File.Delete(oldFilePath);
-                            }
-                        }
-
-                        // Save new file
-                        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
-
-                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + signedAgreement.FileName;
-                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await signedAgreement.CopyToAsync(fileStream);
-                        }
-
-                        contract.SignedAgreementPath = "/uploads/" + uniqueFileName;
-                        contract.SignedAgreementFileName = signedAgreement.FileName;
+                        ModelState.AddModelError("signedAgreement", "ONLY PDF files are allowed!");
+                        return View(contract);
                     }
 
-                    _context.Update(contract);
-                    await _context.SaveChangesAsync();
+                    // Delete old file from disk (web concern)
+                    if (!string.IsNullOrEmpty(oldFilePath))
+                    {
+                        string oldFullPath = Path.Combine(_webHostEnvironment.WebRootPath, oldFilePath.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFullPath))
+                        {
+                            System.IO.File.Delete(oldFullPath);
+                        }
+                    }
+
+                    // Save new file
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + signedAgreement.FileName;
+                    string fullFilePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(fullFilePath, FileMode.Create))
+                    {
+                        await signedAgreement.CopyToAsync(fileStream);
+                    }
+
+                    contract.SignedAgreementPath = "/uploads/" + uniqueFileName;
+                    contract.SignedAgreementFileName = signedAgreement.FileName;
+                }
+
+                // Ask service to update
+                var result = await _contractService.UpdateContractAsync(contract, signedAgreement, oldFilePath, oldFileName, _webHostEnvironment);
+
+                if (result.Success)
+                {
                     TempData["Success"] = "Contract updated!";
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ContractExists(contract.ContractId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+
+                ModelState.AddModelError("", result.Error ?? "Error updating contract");
             }
 
-            ViewBag.Clients = _context.Clients.ToList();
             return View(contract);
         }
 
         // GET: Contracts/Search - Search/filter contracts
+        // STUDENT NOTE: The service handles the filtering logic
         public async Task<IActionResult> Search(DateTime? startDate, DateTime? endDate, string? status)
         {
-            // Start with all contracts
-            var query = _context.Contracts.Include(c => c.Client).AsQueryable();
+            var results = await _contractService.SearchContractsAsync(startDate, endDate, status);
 
-            // Filter by start date if provided
-            if (startDate.HasValue)
-            {
-                query = query.Where(c => c.StartDate >= startDate.Value);
-            }
-
-            // Filter by end date if provided
-            if (endDate.HasValue)
-            {
-                query = query.Where(c => c.EndDate <= endDate.Value);
-            }
-
-            // Filter by status if provided
-            if (!string.IsNullOrEmpty(status))
-            {
-                query = query.Where(c => c.Status == status);
-            }
-
-            var results = await query.ToListAsync();
-
-            // Pass data to the view for display
+            // Pass search parameters back to view for display
             ViewBag.CurrentStartDate = startDate;
             ViewBag.CurrentEndDate = endDate;
             ViewBag.CurrentStatus = status;
@@ -238,10 +207,10 @@ namespace TechMoveGLMS.Controllers
             return View(results);
         }
 
-        // GET: Contracts/DownloadFile/5 - Download the signed agreement PDF
+        // GET: Contracts/DownloadFile/5 - Download PDF
         public async Task<IActionResult> DownloadFile(int id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
+            var contract = await _contractService.GetContractDetailsAsync(id);
             if (contract == null || string.IsNullOrEmpty(contract.SignedAgreementPath))
             {
                 TempData["Error"] = "No file available to download";
@@ -257,11 +226,6 @@ namespace TechMoveGLMS.Controllers
 
             byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
             return File(fileBytes, "application/pdf", contract.SignedAgreementFileName ?? "contract.pdf");
-        }
-
-        private bool ContractExists(int id)
-        {
-            return _context.Contracts.Any(e => e.ContractId == id);
         }
     }
 }
