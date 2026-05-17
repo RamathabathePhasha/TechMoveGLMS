@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TechMoveGLMS.Models;
-using TechMoveGLMS.Services;  // We need this to use IContractService
+using TechMoveGLMS.Services;  
 
 namespace TechMoveGLMS.Controllers
 {
-    // STUDENT NOTE: This controller is now THIN - it does very little work
-    // All the real work is delegated to the Service layer
+   
     public class ContractsController : Controller
     {
-        // The controller ONLY knows about the Service (not the database!)
+        
         private readonly IContractService _contractService;
-        private readonly IWebHostEnvironment _webHostEnvironment;  // Still needed for file paths
+        private readonly IWebHostEnvironment _webHostEnvironment;  
 
         // Constructor receives the service via Dependency Injection
         public ContractsController(IContractService contractService, IWebHostEnvironment webHostEnvironment)
@@ -20,7 +19,7 @@ namespace TechMoveGLMS.Controllers
         }
 
         // GET: Contracts - Show all contracts
-        // STUDENT NOTE: Controller just asks service for data, then shows view
+       
         public async Task<IActionResult> Index()
         {
             var contracts = await _contractService.GetAllContractsAsync();
@@ -60,7 +59,7 @@ namespace TechMoveGLMS.Controllers
                 string? filePath = null;
                 string? fileName = null;
 
-                // Handle file upload (this is still in controller because it's HTTP/web concern)
+                // Handle file upload 
                 if (signedAgreement != null && signedAgreement.Length > 0)
                 {
                     // BUSINESS RULE: Only PDF files allowed
@@ -71,7 +70,7 @@ namespace TechMoveGLMS.Controllers
                         return View(contract);
                     }
 
-                    // Save the file to disk (web concern)
+                    // Save the file to disk
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
                     if (!Directory.Exists(uploadsFolder))
                     {
@@ -90,7 +89,7 @@ namespace TechMoveGLMS.Controllers
                     fileName = signedAgreement.FileName;
                 }
 
-                // STUDENT NOTE: Now ask the SERVICE to create the contract
+                //The SERVICE creates the contract
                 var result = await _contractService.CreateContractAsync(contract, filePath, fileName);
 
                 if (result.Success)
@@ -148,7 +147,7 @@ namespace TechMoveGLMS.Controllers
                         return View(contract);
                     }
 
-                    // Delete old file from disk (web concern)
+                    // Delete old file from disk 
                     if (!string.IsNullOrEmpty(oldFilePath))
                     {
                         string oldFullPath = Path.Combine(_webHostEnvironment.WebRootPath, oldFilePath.TrimStart('/'));
@@ -193,7 +192,7 @@ namespace TechMoveGLMS.Controllers
         }
 
         // GET: Contracts/Search - Search/filter contracts
-        // STUDENT NOTE: The service handles the filtering logic
+        //The service handles the filtering logic
         public async Task<IActionResult> Search(DateTime? startDate, DateTime? endDate, string? status)
         {
             var results = await _contractService.SearchContractsAsync(startDate, endDate, status);

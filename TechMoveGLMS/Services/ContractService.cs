@@ -34,7 +34,7 @@ namespace TechMoveGLMS.Services
             return await _contractRepository.GetContractByIdAsync(id);
         }
 
-        // STUDENT NOTE: This is where business rules LIVE
+        //This is where business rules LIVE
         // Create a new contract
         public async Task<(bool Success, string? Error)> CreateContractAsync(Contract contract, string? filePath, string? fileName)
         {
@@ -59,7 +59,7 @@ namespace TechMoveGLMS.Services
             string? oldFileName,
             IWebHostEnvironment webHostEnvironment)
         {
-            // STUDENT NOTE: If no new file was uploaded, keep the old one
+            //If no new file was uploaded, keep the old one
             if (newFile == null)
             {
                 contract.SignedAgreementPath = oldFilePath;
@@ -76,7 +76,7 @@ namespace TechMoveGLMS.Services
             return (true, null);
         }
 
-        // STUDENT NOTE: Search/filter logic using LINQ
+        //Search/filter logic using LINQ
         // This is business logic - defining HOW to filter
         public async Task<List<Contract>> SearchContractsAsync(DateTime? startDate, DateTime? endDate, string? status)
         {
@@ -108,7 +108,7 @@ namespace TechMoveGLMS.Services
             return query.ToList();
         }
 
-        // STUDENT NOTE: Helper method to delete old files from server
+        //Helper method to delete old files from server
         // This prevents cluttering the server with old PDFs
         public async Task DeleteOldFileAsync(string? filePath, IWebHostEnvironment webHostEnvironment)
         {

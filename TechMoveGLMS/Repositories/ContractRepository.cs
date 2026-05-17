@@ -12,14 +12,14 @@ namespace TechMoveGLMS.Repositories
         private readonly ApplicationDbContext _context;
 
         // Constructor - receives the database context when created
-        // STUDENT NOTE: This is Dependency Injection - the system gives us what we need
+        //This is Dependency Injection - the system gives us what we need
         public ContractRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
         // Get ALL contracts, AND include their related Client data
-        // STUDENT NOTE: Include() is like SQL JOIN - gets parent data too
+        // Include() is like SQL JOIN - gets parent data too
         public async Task<List<Contract>> GetAllContractsAsync()
         {
             return await _context.Contracts

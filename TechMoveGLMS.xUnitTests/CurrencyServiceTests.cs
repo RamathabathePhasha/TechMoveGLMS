@@ -52,7 +52,7 @@ namespace TechMoveGLMS.Tests
         [Fact]
         public void ConvertUsdToZar_WhenAmountNeedsRounding_RoundsToTwoDecimals()
         {
-            // 10.55 * 15.75 = 166.1625, rounds to 166.16
+            //e.g 10.55 * 15.75 = 166.1625, rounds to 166.16
             decimal usd = 10.55m;
             decimal rate = 15.75m;
 

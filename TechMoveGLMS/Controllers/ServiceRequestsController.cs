@@ -10,7 +10,7 @@ namespace TechMoveGLMS.Controllers
     public class ServiceRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly ICurrencyService _currencyService; // For currency conversion
+        private readonly ICurrencyService _currencyService; // used for currency conversion
 
         public ServiceRequestsController(ApplicationDbContext context, ICurrencyService currencyService)
         {
@@ -19,7 +19,6 @@ namespace TechMoveGLMS.Controllers
         }
 
         // GET: ServiceRequests/Create - Show form to create service request
-        // GET: ServiceRequests/Create
         [HttpGet]
         public async Task<IActionResult> Create(int contractId)
         {

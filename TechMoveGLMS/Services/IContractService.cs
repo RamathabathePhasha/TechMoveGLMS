@@ -15,7 +15,7 @@ namespace TechMoveGLMS.Services
         Task<Contract?> GetContractForEditAsync(int id);
 
         // Create a new contract with file upload
-        // STUDENT NOTE: The tuple (bool, string?) returns either success flag OR error message
+        //The tuple (bool, string?) returns either success flag OR error message
         Task<(bool Success, string? Error)> CreateContractAsync(Contract contract, string? filePath, string? fileName);
 
         // Update existing contract
