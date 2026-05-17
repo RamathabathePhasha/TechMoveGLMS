@@ -1,32 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TechMoveGLMS.Data;
 using TechMoveGLMS.Models;
-using TechMoveGLMS.Services;  
+using TechMoveGLMS.Services;
 
 namespace TechMoveGLMS.Controllers
 {
-   
     public class ContractsController : Controller
     {
-        
         private readonly IContractService _contractService;
-        private readonly IWebHostEnvironment _webHostEnvironment;  
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ApplicationDbContext _context;  // For dropdown lists
 
-        // Constructor receives the service via Dependency Injection
-        public ContractsController(IContractService contractService, IWebHostEnvironment webHostEnvironment)
+        public ContractsController(IContractService contractService, IWebHostEnvironment webHostEnvironment, ApplicationDbContext context)
         {
             _contractService = contractService;
             _webHostEnvironment = webHostEnvironment;
+            _context = context;
         }
 
-        // GET: Contracts - Show all contracts
-       
+        // GET: Contracts
         public async Task<IActionResult> Index()
         {
             var contracts = await _contractService.GetAllContractsAsync();
             return View(contracts);
         }
 
-        // GET: Contracts/Details/5 - Show one contract with details
+        // GET: Contracts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -43,13 +43,15 @@ namespace TechMoveGLMS.Controllers
             return View(contract);
         }
 
-        // GET: Contracts/Create - Show the form
+        // GET: Contracts/Create
         public IActionResult Create()
         {
+            // FIX: Load clients for dropdown
+            ViewBag.Clients = _context.Clients.ToList();
             return View();
         }
 
-        // POST: Contracts/Create - Save new contract
+        // POST: Contracts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ClientId,StartDate,EndDate,Status,ServiceLevel")] Contract contract, IFormFile? signedAgreement)
@@ -59,18 +61,16 @@ namespace TechMoveGLMS.Controllers
                 string? filePath = null;
                 string? fileName = null;
 
-                // Handle file upload 
                 if (signedAgreement != null && signedAgreement.Length > 0)
                 {
-                    // BUSINESS RULE: Only PDF files allowed
                     var fileExtension = Path.GetExtension(signedAgreement.FileName).ToLower();
                     if (fileExtension != ".pdf")
                     {
                         ModelState.AddModelError("signedAgreement", "ONLY PDF files are allowed!");
+                        ViewBag.Clients = _context.Clients.ToList();  // Reload on error
                         return View(contract);
                     }
 
-                    // Save the file to disk
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
                     if (!Directory.Exists(uploadsFolder))
                     {
@@ -89,7 +89,6 @@ namespace TechMoveGLMS.Controllers
                     fileName = signedAgreement.FileName;
                 }
 
-                //The SERVICE creates the contract
                 var result = await _contractService.CreateContractAsync(contract, filePath, fileName);
 
                 if (result.Success)
@@ -101,10 +100,11 @@ namespace TechMoveGLMS.Controllers
                 ModelState.AddModelError("", result.Error ?? "Error creating contract");
             }
 
+            ViewBag.Clients = _context.Clients.ToList();  // Reload on error
             return View(contract);
         }
 
-        // GET: Contracts/Edit/5 - Show edit form
+        // GET: Contracts/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -118,10 +118,13 @@ namespace TechMoveGLMS.Controllers
                 return NotFound();
             }
 
+            // FIX: Load clients for dropdown in Edit view
+            ViewBag.Clients = _context.Clients.ToList();
+
             return View(contract);
         }
 
-        // POST: Contracts/Edit/5 - Save edited contract
+        // POST: Contracts/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ContractId,ClientId,StartDate,EndDate,Status,ServiceLevel,SignedAgreementPath,SignedAgreementFileName")] Contract contract, IFormFile? signedAgreement)
@@ -136,18 +139,16 @@ namespace TechMoveGLMS.Controllers
                 string? oldFilePath = contract.SignedAgreementPath;
                 string? oldFileName = contract.SignedAgreementFileName;
 
-                // Handle new file upload if provided
                 if (signedAgreement != null && signedAgreement.Length > 0)
                 {
-                    // BUSINESS RULE: Validate PDF
                     var fileExtension = Path.GetExtension(signedAgreement.FileName).ToLower();
                     if (fileExtension != ".pdf")
                     {
                         ModelState.AddModelError("signedAgreement", "ONLY PDF files are allowed!");
+                        ViewBag.Clients = _context.Clients.ToList();  // Reload on error
                         return View(contract);
                     }
 
-                    // Delete old file from disk 
                     if (!string.IsNullOrEmpty(oldFilePath))
                     {
                         string oldFullPath = Path.Combine(_webHostEnvironment.WebRootPath, oldFilePath.TrimStart('/'));
@@ -157,7 +158,6 @@ namespace TechMoveGLMS.Controllers
                         }
                     }
 
-                    // Save new file
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
                     if (!Directory.Exists(uploadsFolder))
                     {
@@ -176,7 +176,6 @@ namespace TechMoveGLMS.Controllers
                     contract.SignedAgreementFileName = signedAgreement.FileName;
                 }
 
-                // Ask service to update
                 var result = await _contractService.UpdateContractAsync(contract, signedAgreement, oldFilePath, oldFileName, _webHostEnvironment);
 
                 if (result.Success)
@@ -188,16 +187,15 @@ namespace TechMoveGLMS.Controllers
                 ModelState.AddModelError("", result.Error ?? "Error updating contract");
             }
 
+            ViewBag.Clients = _context.Clients.ToList();  // Reload on error
             return View(contract);
         }
 
-        // GET: Contracts/Search - Search/filter contracts
-        //The service handles the filtering logic
+        // GET: Contracts/Search
         public async Task<IActionResult> Search(DateTime? startDate, DateTime? endDate, string? status)
         {
             var results = await _contractService.SearchContractsAsync(startDate, endDate, status);
 
-            // Pass search parameters back to view for display
             ViewBag.CurrentStartDate = startDate;
             ViewBag.CurrentEndDate = endDate;
             ViewBag.CurrentStatus = status;
@@ -206,7 +204,7 @@ namespace TechMoveGLMS.Controllers
             return View(results);
         }
 
-        // GET: Contracts/DownloadFile/5 - Download PDF
+        // GET: Contracts/DownloadFile/5
         public async Task<IActionResult> DownloadFile(int id)
         {
             var contract = await _contractService.GetContractDetailsAsync(id);
